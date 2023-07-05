@@ -1,44 +1,51 @@
-import { useState } from 'react';
-import { useFetch } from './useFetch';
+// Coumpound Components
 
+import { Children, cloneElement, useState } from "react";
 
+const s = {
+  style: {
+    fontSize: '60px',
+  },
+};
+
+const TurnOnOff = ({ children }) => {
+  const [ isOn, setIsOn ] = useState(false);
+  const onTurn = () => setIsOn(s => !s);
+
+  return Children.map(children, child => {
+    const newChild = cloneElement(child, {
+      isOn,
+      onTurn,
+    });
+    return newChild;
+  });
+};
+
+const TurnedOn = ({ isOn, children }) => {
+  return isOn ? children : null;
+};
+
+const TurnedOff = ({ isOn, children }) => {
+  return isOn ? null : children;
+};
+
+const TurndButton = ({ isOn, onTurn, ...props}) => {
+  return <button onClick={onTurn} {...props}>Turn {isOn ? 'OFF' : 'ON'}</button>;
+};
+
+const P = ({ children }) => {
+  return <p{ ...s }>{children}</p>
+};
 
 const Home = () => {
-  const [postId, setPostId] = useState('');
-  const [result, loading] = useFetch('https://jsonplaceholder.typicode.com/posts/' + postId, {
-    headers: {
-      abc: '1' + postId,
-    },
-  });
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  const handleClick = (id) => {
-    setPostId(id);
-  };
-
-  if (!loading && result) {
-    // 1
-    return (
-      <div>
-        {result?.length > 0 ? (
-          result.map((p) => (
-            <div key={`post-${p.id}`} onClick={() => handleClick(p.id)}>
-              <p>{p.title}</p>
-            </div>
-          ))
-        ) : (
-          <div onClick={() => handleClick('')}>
-            <p>{result.title}</p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return <h1>Oi</h1>;
+  return (
+    <TurnOnOff>
+      <TurnedOn><P>Aqui as coisa que vão acontecer quando estiver On</P></TurnedOn>
+      <TurnedOff><P>Aqui vêm as coisas do Off</P></TurnedOff>
+      <TurndButton { ...s } />
+    </TurnOnOff>
+  );
 };
 
 export default Home;
